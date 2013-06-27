@@ -35,7 +35,6 @@ import org.junit.runner.Result;
 import ucl.physiol.neuroconstruct.test.MainTest;
 
 import ucl.physiol.neuroconstruct.gui.ValidityStatus;
-import ucl.physiol.neuroconstruct.hpc.mpi.MpiConfiguration;
 import ucl.physiol.neuroconstruct.hpc.mpi.MpiSettings;
 import ucl.physiol.neuroconstruct.mechanisms.CellMechanism;
 import ucl.physiol.neuroconstruct.mechanisms.ChannelMLCellMechanism;
@@ -300,6 +299,8 @@ public class NeuronFileManagerTest {
     {
         compareSims(NeuronFileManager.RUN_HOC, false, DataSaveFormat.TEXT_NC);
     }*/
+    
+   
     @Test public void testCompareHocParText() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         compareSims(NeuronFileManager.RUN_HOC, true, DataSaveFormat.TEXT_NC);
@@ -308,17 +309,10 @@ public class NeuronFileManagerTest {
     {
         compareSims(NeuronFileManager.RUN_HOC, false, DataSaveFormat.HDF5_NC);
     }
-    @Test public void testCompareHocParH5() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
-    {
-        compareSims(NeuronFileManager.RUN_HOC, true, DataSaveFormat.HDF5_NC);
-    }
-
-     
     @Test public void testComparePyXSerText() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         compareSims(NeuronFileManager.RUN_PYTHON_XML, false, DataSaveFormat.TEXT_NC);
     }
-   
     @Test public void testComparePyXParText() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         compareSims(NeuronFileManager.RUN_PYTHON_XML, true, DataSaveFormat.TEXT_NC);
@@ -331,24 +325,26 @@ public class NeuronFileManagerTest {
     {
         compareSims(NeuronFileManager.RUN_PYTHON_XML, true, DataSaveFormat.HDF5_NC);
     }
-
-
-
-       
-
     @Test public void testComparePyH5SerText() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         compareSims(NeuronFileManager.RUN_PYTHON_HDF5, false, DataSaveFormat.TEXT_NC);
     }
- /*
+    @Test public void testComparePyH5SerH5() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
+    {
+        compareSims(NeuronFileManager.RUN_PYTHON_HDF5, false, DataSaveFormat.HDF5_NC);
+    }  /* 
+    
+    
+    @Test public void testCompareHocParH5() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
+    {
+        compareSims(NeuronFileManager.RUN_HOC, true, DataSaveFormat.HDF5_NC);
+    }*/
+    
+    /*
     @Test public void testComparePyH5ParText() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         compareSims(NeuronFileManager.RUN_PYTHON_HDF5, true, DataSaveFormat.TEXT_NC);
     }*/
-    @Test public void testComparePyH5SerH5() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
-    {
-        compareSims(NeuronFileManager.RUN_PYTHON_HDF5, false, DataSaveFormat.HDF5_NC);
-    }
     /*@Test public void testComparePyH5ParH5() throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         compareSims(NeuronFileManager.RUN_PYTHON_HDF5, true, DataSaveFormat.HDF5_NC);
@@ -369,6 +365,7 @@ public class NeuronFileManagerTest {
         compareSims(NeuronFileManager.RUN_PYTHON_HDF5);
     }*/
 
+    @SuppressWarnings("SleepWhileInLoop")
     private void compareSims(int runMode, boolean parallel, DataSaveFormat dsf) throws ProjectFileParsingException, InterruptedException, NeuronException, IOException, SimulationDataException
     {
         assumeTrue(MainTest.testPNEURON());
@@ -576,9 +573,11 @@ public class NeuronFileManagerTest {
 
         numRecordings = simDataParallel0.getCellSegRefs(false).size();
 
-        assertEquals(numRecordings, numGenParallel);
-
         System.out.println("Have found "+ numRecordings+" recordings in dir: "+ simDataParallel0.getSimulationDirectory().getAbsolutePath());
+        if (numGenParallel!=numRecordings)
+            System.out.println("Sims: "+simDataParallel0.getCellSegRefs(false));
+        assertEquals(numGenParallel, numRecordings);
+
 
         for(String cg: sc.getCellGroups())
         {
