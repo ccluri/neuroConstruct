@@ -32,7 +32,6 @@ import java.util.*;
 
 import javax.vecmath.*;
 import javax.xml.parsers.*;
-import org.neuroml.model.util.NeuroMLElements;
 
 import org.xml.sax.*;
 import ucl.physiol.neuroconstruct.cell.*;
@@ -1938,13 +1937,13 @@ public class MorphMLConverter extends FormatImporter
                 {
                     rootElement.addAttribute(new SimpleXMLAttribute(NeuroMLConstants.XSI_SCHEMA_LOC,
                                                                     NeuroMLConstants.NAMESPACE_URI_VERSION_2
-                                                                    + "  " + NeuroMLElements.DEFAULT_SCHEMA_FILENAME_VERSION_2_ALPHA));
+                                                                    + "  " + NeuroMLConstants.DEFAULT_SCHEMA_FILENAME_VERSION_2_ALPHA));
                 }
                 else if (version.isVersion2beta())
                 {
                     rootElement.addAttribute(new SimpleXMLAttribute(NeuroMLConstants.XSI_SCHEMA_LOC,
                                                                     NeuroMLConstants.NAMESPACE_URI_VERSION_2
-                                                                    + "  " + NeuroMLElements.DEFAULT_SCHEMA_FILENAME_VERSION_2_BETA));
+                                                                    + "  " + NeuroMLConstants.DEFAULT_SCHEMA_FILENAME_VERSION_2_BETA));
                 }
 
             }
@@ -1966,8 +1965,6 @@ public class MorphMLConverter extends FormatImporter
             if (version.isVersion2())
             {
                 ArrayList<String> allChanMechs = cell.getAllChanMechNames(true);
-                
-                allChanMechs = (ArrayList<String>)GeneralUtils.reorderAlphabetically(allChanMechs, true);
 
                 for(String chan: allChanMechs)
                 {

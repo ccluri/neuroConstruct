@@ -152,7 +152,6 @@ public class SimulationData
         dataLoaded = false;
     }
 
-    @SuppressWarnings("SleepWhileInLoop")
     public void initialise()  throws SimulationDataException
     {
         if (dataLoaded)
@@ -172,12 +171,6 @@ public class SimulationData
 
         String unitSystemDesc = props.getProperty("Unit system");
         logger.logComment("unitSystemDesc: "+ unitSystemDesc);
-        
-        if (props.getProperty("Simulator").equals("LEMS"))
-        {
-            //TODO: allow saving in Phys units in LEMS!!
-            unitSystemDesc = UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_SI_UNITS);
-        }
 
         int unitSystem = UnitConverter.getUnitSystemIndex(unitSystemDesc);
 
@@ -418,7 +411,7 @@ public class SimulationData
                 }
                 else if (variable.indexOf(SimPlot.SPIKE)<0)
                 {
-                    double[] dataArray = readDataFileToArray(cellDataFiles[fileIndex], conversionFactor, true);
+                    double[] dataArray = readDataFileToArray(cellDataFiles[fileIndex], conversionFactor);
                     DataStore ds = new DataStore(dataArray, cellGroup, cellNum, segId, variable, xUnit, yUnit, pso);
 
                     dataSources.add(ds);
@@ -427,7 +420,6 @@ public class SimulationData
                 else
                 {
                     double[] spikeTimes = readDataFileToArray(cellDataFiles[fileIndex], timeConversionFactor);
-                    
                     DataStore ds = new DataStore(spikeTimes,
                                                  NON_SPIKING_VOLTAGE,
                                                  SPIKING_VOLTAGE,
@@ -559,7 +551,7 @@ public class SimulationData
 
         ArrayList<DataStore> datas = this.getDataForCellSegRef(cellSegRef, false);
 
-        DataStore volts;
+        DataStore volts = null;
 
 
         for (DataStore ds: datas)
@@ -622,7 +614,7 @@ public class SimulationData
 
         DataSet dataSet = new DataSet(ref, null,
                                        "ms", 
-                                       SimPlot.getUnitSymbol(variable),
+                                       SimPlot.getUnits(variable),
                                        "Time",
                                        SimPlot.getLegend(variable));
 
@@ -660,18 +652,11 @@ public class SimulationData
     }
 
 
+
     private double[] readDataFileToArray(File dataFile, double scaleFactor) throws SimulationDataException
     {
-        return readDataFileToArray(dataFile, scaleFactor, false);
-    }
-
-    private double[] readDataFileToArray(File dataFile, double scaleFactor, boolean allowDoubleColumn) throws SimulationDataException
-    {
         String nextLine = null;
-        double[] data;
-                        
-        logger.logComment("Reading in data from: "+ dataFile);
-        
+        double[] data = null;
         try
         {
             Reader in = new FileReader(dataFile);
@@ -688,12 +673,7 @@ public class SimulationData
             {
                 if (!nextLine.startsWith("//") && nextLine.trim().length()>0)
                 {
-                    String num = nextLine.trim();
-                    //System.out.println("num ("+num+")");
-                    if (allowDoubleColumn && nextLine.split("\\s+").length>1)
-                        num = nextLine.split("\\s+")[1];
-                    
-                    double nextEntry = Double.parseDouble(num);
+                    double nextEntry = Double.parseDouble(nextLine);
                     if (tempArray.length<=numDataPointsAdded)
                     {
                         double[] tempArray2 = new double[numDataPointsAdded*2];
@@ -744,7 +724,7 @@ public class SimulationData
     public static double[][] read2dDataFileToArrays(File dataFile, double scaleFactor) throws SimulationDataException
     {
         String nextLine = null;
-        double[][] data;
+        double[][] data = null;
         try
         {
             Reader in = new FileReader(dataFile);
@@ -1223,7 +1203,7 @@ public class SimulationData
 
     private static String getCellRef(String cellRefOrCellSegRef)
     {
-        String cellRef;
+        String cellRef = null;
 
         if (cellRefOrCellSegRef.indexOf(".")>=0)
         {
@@ -1419,15 +1399,14 @@ public class SimulationData
 
     public static void main(String[] args) throws IOException
     {
-        File f;
-        /*
+        File f = null;
         f = new File("testProjects/TestHDF5/simulations/TestText");
         f = new File("testProjects/TestHDF5/simulations/TestTextBig");
         f = new File("testProjects/TestHDF5/simulations/TestH5Big");
         f = new File("testProjects/TestHDF5/simulations/TestSpikes");
         f = new File("testProjects/TestHDF5/simulations/TestH5");
-        f = new File("testProjects/TestHDF5/simulations/TestSpikesHDF5");*/
-        f = new File("osb/showcase/neuroConstructShowcase/Ex10_NeuroML2/simulations/LEMS_test");
+        f = new File("testProjects/TestHDF5/simulations/TestSpikesHDF5");
+        f = new File("osb/models/cerebellum/networks/GranCellLayer/neuroConstruct/simulations/DT_SingleGranulecell__M_0.0001");
 
         SimulationData simulationData1 = null;
         try
@@ -1458,7 +1437,6 @@ public class SimulationData
         catch (SimulationDataException ex)
         {
             System.out.println("Error...");
-            ex.printStackTrace();
         }
 
     }

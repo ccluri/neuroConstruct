@@ -216,7 +216,6 @@ public class ProjectStructure
     private static String sbmlNeuronMappingFile = "SBML2NEURON.py";
 
     private static String nml2Dir = "NeuroML2";
-    private static String jnmlDir = "jNeuroMLJar";
 
     private static String channelml2Neuroml2Dir = "ChannelMLConvert";
 
@@ -468,11 +467,6 @@ public class ProjectStructure
     public static File getNeuroML2Dir()
     {
         return new File(getnCHome(), nml2Dir);
-    }
-
-    public static File getjNeuroMLDir()
-    {
-        return new File(getnCHome(), jnmlDir);
     }
 
     public static File getRelNotesFile()

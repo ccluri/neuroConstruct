@@ -30,14 +30,11 @@ import java.io.*;
 import java.util.*;
 
 import javax.vecmath.*;
-import org.lemsml.jlems.core.sim.Sim;
-import org.lemsml.jlems.core.type.Component;
 
-
-import org.lemsml.sim.StringInclusionReader;
-
-import org.neuroml.export.Utils;
-import org.neuroml.model.util.NeuroMLConverter;
+import org.lemsml.sim.*;
+import org.lemsml.util.*;
+import org.lemsml.type.*;
+import org.neuroml.Utils;
 
 import ucl.physiol.neuroconstruct.cell.*;
 import ucl.physiol.neuroconstruct.cell.utils.*;
@@ -1056,7 +1053,7 @@ public class NeuronTemplateGenerator
     }
 
 
-    private String getProcBiophys() throws NeuronException
+    private String getProcBiophys()
     {
         logger.logComment("calling getProcBiophys");
         StringBuilder response = new StringBuilder();
@@ -1144,151 +1141,83 @@ public class NeuronTemplateGenerator
                             XMLCellMechanism nml2Mech = (XMLCellMechanism)cellMech;
 
                             String contents = GeneralUtils.readShortFile(nml2Mech.getXMLFile(project));
+                            contents = Utils.convertNeuroML2ToLems(contents);
 
-                            boolean isV2alpha = contents.indexOf("v2alpha.xsd")>0;
-
-                            if (isV2alpha) 
+                            try
                             {
-                                contents = org.neuroml.Utils.convertNeuroML2ToLems(contents);
-                                logger.logComment("Found contents: " + contents, true);
+                                StringInclusionReader.addSearchPath(ProjectStructure.getNeuroML2Dir());
+                                Sim sim = new Sim(contents);
 
-                                try
+                                sim.readModel();
+
+                                Component comp = sim.getLems().getComponent(nml2Mech.getInstanceName());
+                                
+                                logger.logComment("Found component: " + comp, true);
+
+                                if (comp.getComponentType().isOrExtends(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP))
                                 {
-                                    StringInclusionReader.addSearchPath(ProjectStructure.getNeuroML2Dir());
-                                    org.lemsml.sim.Sim sim = new org.lemsml.sim.Sim(contents);
-                                    sim.readModel();
-                                    org.lemsml.type.Component comp = sim.getLems().getComponent(nml2Mech.getInstanceName());
+                                    String cap = comp.getParamValue(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP__C).stringValue();
+                                    float capacitance =  (float)UnitConverter.getCapacitance(Float.parseFloat(cap),
+                                                                       UnitConverter.GENESIS_SI_UNITS,
+                                                                       UnitConverter.NEURON_UNITS);
 
-                                    logger.logComment("Found component: " + comp, true);
+                                    logger.logComment("Total capacitance: "+cap+" F = " + capacitance +" "+ UnitConverter.capacitanceUnits[UnitConverter.NEURON_UNITS].getSymbol(), true);
 
-                                    if (comp.getComponentType().isOrExtends(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP))
+                                    for (Section sec: secs)
                                     {
-                                        String cap = comp.getParamValue(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP__C).stringValue();
-                                        float capacitance =  (float)UnitConverter.getCapacitance(Float.parseFloat(cap), UnitConverter.GENESIS_SI_UNITS, UnitConverter.NEURON_UNITS);
-
-                                        logger.logComment("Total capacitance: "+cap+" F = " + capacitance +" "+ UnitConverter.capacitanceUnits[UnitConverter.NEURON_UNITS].getSymbol(), true);
-
-                                        for (Section sec: secs)
-                                        {
-                                            if (sec.getNumberInternalDivisions()>1)
-                                            {
-                                                GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on section with nseg>1!", null, null);
-                                                return null;
-                                            }
-                                            Segment seg = cell.getAllSegmentsInSection(sec).getFirst();
-                                            float area = seg.getSegmentSurfaceArea() * 1e-8f; // um2 -> cm2
-                                            float specCap = capacitance/area;
-                                            System.out.println("capacitance: "+capacitance+", area: "+area+" cm2, specCap: "+specCap+" um/cm2");
-                                            subResponse.append("    "+sec.getSectionName()+" cm = "+specCap+" \n");
-                                        }
-
-                                    }
-                                    else if (comp.getComponentType().isOrExtends(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT))
-                                    {
-                                        if (secs.size()>1)
-                                        {
-                                            GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on cell with >1 section!", null, null);
-                                            return null;
-                                        }
-                                        Segment seg = cell.getAllSegments().get(0);
-                                        if (seg.getSection().getNumberInternalDivisions()>1)
+                                        if (sec.getNumberInternalDivisions()>1)
                                         {
                                             GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on section with nseg>1!", null, null);
                                             return null;
                                         }
+                                        Segment seg = cell.getAllSegmentsInSection(sec).getFirst();
+                                        
+                                        float area = seg.getSegmentSurfaceArea() * 1e-8f; // um2 -> cm2
 
-                                        float specCap = cell.getSpecCapForGroup(Section.ALL); // uF um-2
-                                        float specCapSI = specCap * 1e6f; // F m-2
-                                        float area = seg.getSegmentSurfaceArea(); // um2
-                                        float areaSI = area * 1e-12f; // m2
-                                        float totCapSI = specCapSI * areaSI;
-                                        float targetCapSI = 1e-9f;
-
-                                        if (Math.abs(targetCapSI-totCapSI)>targetCapSI*1e-6)
-                                        {
-                                            GuiUtils.showInfoMessage(logger, "Capacitance info", "Total capacitance: "+totCapSI+" F, area: "+areaSI+" m2 ("+area+" um2), "
-                                                + "specCap: "+specCapSI+" F/m2 ("+specCap+" uF um-2) on cell:\n"
-                                                + cell+ "\nTotal capacitance of cell based on NeuroML 2 component class: "+NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT+" (but"
-                                                + " not "+NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP+") should be "+targetCapSI+" F", null);
-                                        }
+                                        float specCap = capacitance/area;
+                                        System.out.println("capacitance: "+capacitance+", area: "+area+" cm2, specCap: "+specCap+" um/cm2");
+                                        subResponse.append("    "+sec.getSectionName()+" cm = "+specCap+" \n");
 
                                     }
 
                                 }
-                                catch (org.lemsml.util.ContentError ce)
+                                else if (comp.getComponentType().isOrExtends(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT))
                                 {
-                                    GuiUtils.showErrorMessage(logger, "Problem parsing XML for cell mech: "+cellMech , ce, null);
+                                    if (secs.size()>1)
+                                    {
+                                        GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on cell with >1 section!", null, null);
+                                        return null;
+                                    }
+                                    Segment seg = cell.getAllSegments().get(0);
+                                    if (seg.getSection().getNumberInternalDivisions()>1)
+                                    {
+                                        GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on section with nseg>1!", null, null);
+                                        return null;
+                                    }
+
+                                    float specCap = cell.getSpecCapForGroup(Section.ALL); // uF um-2
+                                    float specCapSI = specCap * 1e6f; // F m-2
+                                        
+                                    float area = seg.getSegmentSurfaceArea(); // um2
+                                    float areaSI = area * 1e-12f; // m2
+
+                                    float totCapSI = specCapSI * areaSI;
+                                    float targetCapSI = 1e-9f;
+
+                                    if (Math.abs(targetCapSI-totCapSI)>targetCapSI*1e-6)
+                                    {
+                                        GuiUtils.showInfoMessage(logger, "Capacitance info", "Total capacitance: "+totCapSI+" F, area: "+areaSI+" m2 ("+area+" um2), "
+                                            + "specCap: "+specCapSI+" F/m2 ("+specCap+" uF um-2) on cell:\n"
+                                            + cell+ "\nTotal capacitance of cell based on NeuroML 2 component class: "+NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT+" ( but"
+                                            + " not "+NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP+") should be "+targetCapSI+" F", null);
+                                    }
+
                                 }
-                            } 
-                            else
+
+                            }
+                            catch (ContentError ce)
                             {
-                                contents = NeuroMLConverter.convertNeuroML2ToLems(contents);
-                                            
-                                logger.logComment("Starting Lems with: "+contents, true);
-                                            
-                                try
-                                {
-                                    Sim sim = Utils.readLemsNeuroMLFile(contents);
-                                    Component comp = sim.getLems().getComponent(nml2Mech.getInstanceName());
-                                    logger.logComment("Found component: " + comp, true);
-                                    
-                                    if (comp.getComponentType().isOrExtends(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP))
-                                    {
-                                        String cap = comp.getParamValue(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP__C).stringValue();
-                                        float capacitance =  (float)UnitConverter.getCapacitance(Float.parseFloat(cap), UnitConverter.GENESIS_SI_UNITS, UnitConverter.NEURON_UNITS);
-
-                                        logger.logComment("Total capacitance: "+cap+" F = " + capacitance +" "+ UnitConverter.capacitanceUnits[UnitConverter.NEURON_UNITS].getSymbol(), true);
-
-                                        for (Section sec: secs)
-                                        {
-                                            if (sec.getNumberInternalDivisions()>1)
-                                            {
-                                                GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on section with nseg>1!", null, null);
-                                                return null;
-                                            }
-                                            Segment seg = cell.getAllSegmentsInSection(sec).getFirst();
-                                            float area = seg.getSegmentSurfaceArea() * 1e-8f; // um2 -> cm2
-                                            float specCap = capacitance/area;
-                                            System.out.println("capacitance: "+capacitance+", area: "+area+" cm2, specCap: "+specCap+" um/cm2");
-                                            subResponse.append("    "+sec.getSectionName()+" cm = "+specCap+" \n");
-                                        }
-
-                                    }
-                                    else if (comp.getComponentType().isOrExtends(NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT))
-                                    {
-                                        if (secs.size()>1)
-                                        {
-                                            GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on cell with >1 section!", null, null);
-                                            return null;
-                                        }
-                                        Segment seg = cell.getAllSegments().get(0);
-                                        if (seg.getSection().getNumberInternalDivisions()>1)
-                                        {
-                                            GuiUtils.showErrorMessage(logger, "Error: putting "+cellMech.getMechanismType()+" on section with nseg>1!", null, null);
-                                            return null;
-                                        }
-
-                                        float specCap = cell.getSpecCapForGroup(Section.ALL); // uF um-2
-                                        float specCapSI = specCap * 1e6f; // F m-2
-                                        float area = seg.getSegmentSurfaceArea(); // um2
-                                        float areaSI = area * 1e-12f; // m2
-                                        float totCapSI = specCapSI * areaSI;
-                                        float targetCapSI = 1e-9f;
-
-                                        if (Math.abs(targetCapSI-totCapSI)>targetCapSI*1e-6)
-                                        {
-                                            GuiUtils.showInfoMessage(logger, "Capacitance info", "Total capacitance: "+totCapSI+" F, area: "+areaSI+" m2 ("+area+" um2), "
-                                                + "specCap: "+specCapSI+" F/m2 ("+specCap+" uF um-2) on cell:\n"
-                                                + cell+ "\nTotal capacitance of cell based on NeuroML 2 component class: "+NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT+" (but"
-                                                + " not "+NeuroMLConstants.NEUROML2_ABST_CELL_MEMB_POT_CAP+") should be "+targetCapSI+" F", null);
-                                        }
-
-                                    }
-                                }
-                                catch (Exception ex) {
-                                    throw new NeuronException("Problem generating mod file from NeuroML 2/LEMS description", ex);
-                                }
-                                           
+                                GuiUtils.showErrorMessage(logger, "Problem parsing XML for cell mech: "+cellMech , ce, null);
                             }
                         }
 

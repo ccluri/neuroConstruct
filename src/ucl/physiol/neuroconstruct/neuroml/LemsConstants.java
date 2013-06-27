@@ -66,20 +66,11 @@ public class LemsConstants
     public static String TITLE_ATTR = "title";
     public static String TIMESCALE_ATTR = "timeScale";
 
-    public static String XMIN_ATTR = "xmin";
-    public static String XMAX_ATTR = "xmax";
-    public static String YMIN_ATTR = "ymin";
-    public static String YMAX_ATTR = "ymax";
-
     public static String LINE_ELEMENT = "Line";
     public static String QUANTITY_ATTR = "quantity";
     public static String SCALE_ATTR = "scale";
     public static String COLOR_ATTR = "color";
     public static String SAVE_ATTR = "save";
-    
-    public static String OUTPUT_FILE_ELEMENT = "OutputFile";
-    public static String OUTPUT_COLUMN_ELEMENT = "OutputColumn";
-    public static String OUTPUT_FILENAME_ATTR = "fileName";
     
 
 

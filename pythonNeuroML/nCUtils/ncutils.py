@@ -180,8 +180,7 @@ def generateAndRunLems(project,
                         simRef,
                         simulatorSeed,
                         verbose=True,
-                        runInBackground=False,
-                        version=NeuroMLConstants.NeuroMLVersion.NEUROML_VERSION_2_BETA):
+                        runInBackground=False):
 
     prefix = "--- LEMS/NeuroML 2 gen:    "
 
@@ -190,7 +189,7 @@ def generateAndRunLems(project,
     compartmentalisation = OriginalCompartmentalisation()
 
     project.neuromlFileManager.generateNeuroMLFiles(simConfig,
-                                                    version,
+                                                    NeuroMLConstants.NeuroMLVersion.NEUROML_VERSION_2_ALPHA,
                                                     LemsConstants.LemsOption.EXECUTE_MODEL,
                                                     compartmentalisation,
                                                     simulatorSeed,
@@ -311,7 +310,7 @@ def generateAndRunNeuron(project,
         
 class SimulationManager():
 
-    knownSimulators = ["NEURON", "GENESIS", "GENESIS_SI", "GENESIS_PHYS", "MOOSE", "MOOSE_PHYS", "MOOSE_SI", "PSICS", "LEMS", "LEMSalpha", "PYNN_NEST", "PYNN_NEURON", "PYNN_BRIAN"]
+    knownSimulators = ["NEURON", "GENESIS", "GENESIS_SI", "GENESIS_PHYS", "MOOSE", "MOOSE_PHYS", "MOOSE_SI", "PSICS", "LEMS", "PYNN_NEST", "PYNN_NEURON", "PYNN_BRIAN"]
 
     plotFrames = {}
     dataSets = {}
@@ -753,33 +752,6 @@ class SimulationManager():
 
                 self.doCheckNumberSims()
 
-                if simulators.count("LEMSalpha")>0:
-
-                    if simDtOverride is not None:
-                        if simDtOverride.has_key("LEMS"):
-                            self.project.simulationParameters.setDt(simDtOverride["LEMS"])
-                        else:
-                            self.project.simulationParameters.setDt(simDt)
-
-                    simRef = simRefGlobalPrefix + simRefPrefix+"_L"+recompSuffix + simRefGlobalSuffix
-                    self.project.simulationParameters.setReference(simRef)
-
-                    if runSims:
-                        success = generateAndRunLems(self.project,
-                                            self.projectManager,
-                                            simConfig,
-                                            simRef,
-                                            simulatorSeed,
-                                            verbose=verboseSims,
-                                            runInBackground=runInBackground,
-                                            version=NeuroMLConstants.NeuroMLVersion.NEUROML_VERSION_2_ALPHA)
-
-                        if success:
-                            self.allRunningSims.append(simRef)
-                            allSimsSetRunning.append(simRef)
-                    else:
-                        allSimsSetRunning.append(simRef)
-
                 if simulators.count("LEMS")>0:
 
                     if simDtOverride is not None:
@@ -798,8 +770,7 @@ class SimulationManager():
                                             simRef,
                                             simulatorSeed,
                                             verbose=verboseSims,
-                                            runInBackground=runInBackground,
-                                            version=NeuroMLConstants.NeuroMLVersion.NEUROML_VERSION_2_BETA)
+                                            runInBackground=runInBackground)
 
                         if success:
                             self.allRunningSims.append(simRef)

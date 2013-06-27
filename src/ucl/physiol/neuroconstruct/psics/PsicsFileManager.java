@@ -89,8 +89,6 @@ public class PsicsFileManager
 
     SimConfig simConfig = null;
     
-    String psicsSimUnits = UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_PHYSIOLOGICAL_UNITS);
-    
         
     //private boolean quitAfterRun = false;
         
@@ -836,7 +834,7 @@ public class PsicsFileManager
         // Saving summary of the simulation params
         try
         {
-            SimulationsInfo.recordSimulationSummary(project, simConfig, dirForSimDataFiles, "PSICS", null, psicsSimUnits);
+            SimulationsInfo.recordSimulationSummary(project, simConfig, dirForSimDataFiles, "PSICS", null);
         }
         catch (IOException ex2)
         {

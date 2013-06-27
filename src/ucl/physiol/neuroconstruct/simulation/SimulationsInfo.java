@@ -750,8 +750,7 @@ public class SimulationsInfo extends AbstractTableModel implements TreeModel
                                                SimConfig simConfig,
                                                File dirForSummary,
                                                String simulator,
-                                               MorphCompartmentalisation mc,
-                                               String units) throws IOException
+                                               MorphCompartmentalisation mc) throws IOException
     {
         Properties props = new Properties();
 
@@ -875,24 +874,24 @@ public class SimulationsInfo extends AbstractTableModel implements TreeModel
         props.setProperty("Simulation temp", project.simulationParameters.getTemperature()+"");
 
         
-        props.setProperty("Unit system", units);
-            
         if (simulator.toLowerCase().indexOf("pynn")>=0)
         {
-            //props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_PHYSIOLOGICAL_UNITS));
+            props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_PHYSIOLOGICAL_UNITS));
         }
         else if (simulator.equals("LEMS"))
         {
-            //props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_PHYSIOLOGICAL_UNITS));
+            props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_PHYSIOLOGICAL_UNITS));
         }
         else if (simulator.equals("PSICS"))
         {
+            props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(UnitConverter.GENESIS_PHYSIOLOGICAL_UNITS));
             props.setProperty("Single channel conductance", project.psicsSettings.getSingleChannelCond()+"");
             props.setProperty("Spatial discretisation", project.psicsSettings.getSpatialDiscretisation()+"");
         }
         else if (simulator.equals("GENESIS") || simulator.equals("MOOSE"))
         {
             props.setProperty("Num integration method", project.genesisSettings.getNumMethod().toString());
+            props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(project.genesisSettings.getUnitSystemToUse()));
             props.setProperty("Symmetric compartments", project.genesisSettings.isSymmetricCompartments()+"");
             props.setProperty(simulator+" random seed", project.genesisFileManager.getCurrentRandomSeed()+"");
             props.setProperty("GUI Mode", project.genesisSettings.getGraphicsMode()+"");
@@ -924,6 +923,7 @@ public class SimulationsInfo extends AbstractTableModel implements TreeModel
         }
         else if (simulator.equals("NEURON"))
         {
+            props.setProperty("Unit system", UnitConverter.getUnitSystemDescription(UnitConverter.NEURON_UNITS));
             props.setProperty("NEURON random seed", project.neuronFileManager.getCurrentRandomSeed()+"");
             props.setProperty("GUI Mode", project.neuronSettings.getGraphicsMode().toString());
 

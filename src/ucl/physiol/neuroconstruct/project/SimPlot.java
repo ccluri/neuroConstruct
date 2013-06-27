@@ -130,54 +130,43 @@ public class SimPlot
     /**
      * Gets the units if the quantity plotted can be determine from valuePlotted
      */
-    public static String getUnitSymbol(String variable)
-    {
-    /**
-     * Gets the units if the quantity plotted can be determine from valuePlotted
-     */
-        Units[] units = getUnits(variable);
-        if (units==null) 
-            return "";
-        return units[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
-        
-    }
-    
-    public static Units[] getUnits(String variable)
+    public static String getUnits(String variable)
     {
         if (variable.indexOf(SimPlot.VOLTAGE) >= 0)
         {
-            return UnitConverter.voltageUnits;
+            return UnitConverter.voltageUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         if (variable.indexOf(SimPlot.SPIKE) >= 0)
         {
-            return UnitConverter.voltageUnits;
+            return UnitConverter.voltageUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         else if (variable.indexOf(SimPlot.COND_DENS) >= 0)
         {
-            return UnitConverter.conductanceDensityUnits;
+            return UnitConverter.conductanceDensityUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         else if (variable.indexOf(SimPlot.CONCENTRATION) >= 0)
         {
-            return UnitConverter.concentrationUnits;
+            return UnitConverter.concentrationUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         else if (variable.indexOf(SimPlot.CURR_DENS) >= 0)
         {
-            return UnitConverter.currentDensityUnits;
+            return UnitConverter.currentDensityUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         else if (variable.indexOf(SimPlot.REV_POT) >= 0)
         {
-            return UnitConverter.voltageUnits;
+            return UnitConverter.voltageUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         else if (variable.indexOf(SimPlot.SYN_COND) >= 0)
         {
-            return UnitConverter.conductanceUnits;
+            return UnitConverter.conductanceUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
         else if (variable.indexOf(SimPlot.SYN_CURR) >= 0)
         {
-            return UnitConverter.currentUnits;
+            return UnitConverter.currentUnits[UnitConverter.NEUROCONSTRUCT_UNITS].getSymbol();
         }
 
-        return null;
+
+        return "";
     }
 
     /**

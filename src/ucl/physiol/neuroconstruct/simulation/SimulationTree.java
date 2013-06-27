@@ -341,7 +341,7 @@ public class SimulationTree extends JTree implements ActionListener
                             String desc = dataRef;
                             DataSet dataSet = new DataSet(dataRef, desc,
                                                            "ms",
-                                                           SimPlot.getUnitSymbol(ds.getVariable()),
+                                                           SimPlot.getUnits(ds.getVariable()),
                                                            "Time",
                                                            SimPlot.getLegend(ds.getVariable()));
 
@@ -397,7 +397,7 @@ public class SimulationTree extends JTree implements ActionListener
                         String desc = ref;
                         DataSet dataSet = new DataSet(ref, desc,
                                                        "ms",
-                                                       SimPlot.getUnitSymbol(ds.getVariable()),
+                                                       SimPlot.getUnits(ds.getVariable()),
                                                        "Time",
                                                        SimPlot.getLegend(ds.getVariable()));
 

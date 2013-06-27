@@ -15,17 +15,6 @@ fi
 
 startDir=$(pwd)
 
-prefix='git@github.com:'
-
-
-if [ -z "$USE_SSH_FOR_GITHUB" ]; then
-    echo
-    echo "If you use SSH to access GitHub, set the environment variable USE_SSH_FOR_GITHUB to 1"
-    echo "This will clone GitHub repos using SSH. Using HTTPS instead"
-    echo
-    prefix='https://github.com/'
-fi
-
 
 standardGHProject()
 {
@@ -47,7 +36,13 @@ standardGHProject()
     fi
     tgtDir=$startDir/$2/$1
     
-
+    prefix='git@github.com:'
+    
+    # TODO: better test if GitHub set up
+    if [ ! -f $HOME/.gitconfig ]; then
+        prefix='git://github.com/'
+    fi
+    
     if [ ! -d $tgtDir ]; then
         echo "Cloning to: "$tgtDir
         if [ $# == 3 ]; then
@@ -88,7 +83,9 @@ standardGHProject 'CElegansNeuroML' 'invertebrate/celegans' 'openworm'
 standardGHProject 'muscle_model' 'invertebrate/celegans' 'openworm'
 
 standardGHProject 'PyloricNetwork' 'invertebrate/lobster'
+
 standardGHProject 'MorrisLecarModel' 'invertebrate/barnacle'
+
 standardGHProject 'Drosophila_Projection_Neuron' 'invertebrate/drosophila'
 
 standardGHProject 'CA1PyramidalCell' 'hippocampus/CA1_pyramidal_neuron'
@@ -116,7 +113,6 @@ standardGHProject 'L5bPyrCellHayEtAl2011' 'cerebral_cortex/neocortical_pyramidal
 standardGHProject 'IzhikevichModel' 'cerebral_cortex/networks'
 standardGHProject 'Thalamocortical' 'cerebral_cortex/networks'
 standardGHProject 'Brunel2000' 'cerebral_cortex/networks'
-standardGHProject 'VogelsEtAl2011' 'cerebral_cortex/networks'
 
 cd $startDir
 
