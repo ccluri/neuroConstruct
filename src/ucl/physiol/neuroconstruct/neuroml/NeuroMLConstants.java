@@ -26,6 +26,8 @@
 
 package ucl.physiol.neuroconstruct.neuroml;
 
+import org.neuroml.model.util.NeuroMLConverter;
+
 
 
 /**
@@ -115,6 +117,10 @@ public class NeuroMLConstants
         {
             return this.equals(NEUROML_VERSION_2_BETA);
         }
+        public boolean isVersion2betaOrLater()
+        {
+            return !this.equals(NEUROML_VERSION_1) && !this.equals(NEUROML_VERSION_2_ALPHA);
+        }
 
         public boolean isVersion1()
         {
@@ -132,9 +138,6 @@ public class NeuroMLConstants
     public static String NAMESPACE_URI_VERSION_2 = "http://www.neuroml.org/schema/neuroml2";
 
     public static String DEFAULT_SCHEMA_LOCATION = "http://neuroml.svn.sourceforge.net/viewvc/neuroml/trunk/web/NeuroMLFiles/Schemata/v1.8.1/Level3/NeuroML_Level3_v1.8.1.xsd";
-
-    public static String DEFAULT_SCHEMA_FILENAME_VERSION_2_ALPHA = "http://neuroml.svn.sourceforge.net/viewvc/neuroml/NeuroML2/Schemas/NeuroML2/NeuroML_v2alpha.xsd";
-    public static String DEFAULT_SCHEMA_FILENAME_VERSION_2_BETA = "https://raw.github.com/NeuroML/NeuroML2/master/Schemas/NeuroML2/NeuroML_v2beta.xsd";
 
     public static String NEUROML_ID_V2 = "id";
 

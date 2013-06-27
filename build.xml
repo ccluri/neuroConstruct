@@ -97,6 +97,7 @@
     <property name="general.properties.class" value="ucl.physiol.neuroconstruct.project.GeneralProperties"/>
     <property name="xml.transform.class" value="ucl.physiol.neuroconstruct.utils.XMLUtils"/>
     <property name="example.generate.class" value="ucl.physiol.neuroconstruct.website.ExampleProjects"/>
+    <property name="expand.class" value="ucl.physiol.neuroconstruct.project.Expand"/>
 
     <property name="main.gui.dir" value="ucl/physiol/neuroconstruct/gui"/>
     <property name="nmodl.gui.dir" value="ucl/physiol/neuroconstruct/nmodleditor/gui"/>
@@ -113,12 +114,12 @@
 
 
     <property name="libneuroml.dir" value="./NeuroML2"/>
+    <property name="jneuroml.dir" value="./jNeuroMLJar"/>
 
     <available file="./NeuroML2" type="dir" property="libneuroml.dir.exists"/>
     
-    <!--<property name="libneuroml.jar.file" value="${libneuroml.dir}/libNeuroML-2.0.0.jar"/>
-    <property name="lems.jar.file" value="${libneuroml.dir}/lib/lems/lems-0.8.2.jar"/>-->
     <property name="neuroml2.libs" value="lib/neuroml2"/>
+    <property name="jneuroml.libs" value="${jneuroml.dir}"/>
 
     <filter token="year" value="${year}"/>
     <filter token="version" value="${version}"/>
@@ -142,6 +143,9 @@
           <include name="*.jar"/>
         </fileset>
         <fileset dir="${neuroml2.libs}">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${jneuroml.libs}">
           <include name="*.jar"/>
         </fileset>
 
@@ -565,6 +569,19 @@
 
 
   <!-- ====================================================================== -->
+  <!-- Generates the HTML to use on the OSB site. Experimental!!              -->
+  <!-- ====================================================================== -->
+
+  <target name="expand" depends="jar" description="Generates the HTML to use on the OSB site. Experimental!!">
+      <java classname="${expand.class}"
+          fork="true"  failonerror="true">
+        <jvmarg value="-Xmx700M" />
+        <jvmarg value="-Xms600M" />
+        <classpath refid="run.class.path"/>
+      </java>
+ </target>
+
+  <!-- ====================================================================== -->
   <!-- Generates the xml which is used to generate the html page of standard  -->
   <!-- neuroConstruct examples                                                -->
   <!-- ====================================================================== -->
@@ -585,7 +602,7 @@
   <target name="website" depends="glossary, generateexamples"
           description="Generates the main website using Forrest (http://forrest.apache.org)">
 
-    <copy file="./README" todir="${website.dir}/docs" />
+    <copy file="./README.md" todir="${website.dir}/docs" />
     <copy file="./RELEASE_NOTES" todir="${website.dir}/docs" />
 
     <mkdir dir="${website.python.dir}"/>
@@ -630,7 +647,7 @@
 
      <echo>Generated the helpdocs...</echo>
 
-    <copy file="./README" todir="${helpdocs.dir}" />
+    <copy file="./README.md" todir="${helpdocs.dir}" />
     <copy file="./RELEASE_NOTES" todir="${helpdocs.dir}" />
 
   </target>
@@ -756,6 +773,14 @@
       <delete dir="${temp_ver.dir}/NeuroML2/docs"/>
       <delete dir="${temp_ver.dir}/NeuroML2/exportImportUtils/SBML/sbmlTestSuite"/>
       <delete dir="${temp_ver.dir}/NeuroML2/examples/inprogress/ab"/>
+      
+      
+      <mkdir dir="${temp_ver.dir}/jNeuroMLJar"/>
+      <copy todir="${temp_ver.dir}/jNeuroMLJar">
+        <fileset dir="jNeuroMLJar">
+              <include name="**/*"/>
+        </fileset>
+      </copy>
 
       <mkdir dir="${temp_ver.dir}/pythonNeuroML"/>
       <copy todir="${temp_ver.dir}/pythonNeuroML">
@@ -826,7 +851,7 @@
       <copy file="nC.sh" todir="${temp_ver.dir}"/>
       <copy file="nCplot.bat" todir="${temp_ver.dir}"/>
       <copy file="nCplot.sh" todir="${temp_ver.dir}"/>
-      <copy file="README" todir="${temp_ver.dir}"/>
+      <copy file="README.md" todir="${temp_ver.dir}"/>
       <copy file="RELEASE_NOTES" todir="${temp_ver.dir}"/>
       <copy file="RELEASE_NOTES" todir="${temp_ver.dir}/docs/helpdocs"/>
       <copy file="licence.txt" todir="${temp_ver.dir}"/>

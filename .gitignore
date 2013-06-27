@@ -2,12 +2,18 @@
 /pythonnC/TestPython/savedNetworks/nmlt.nml
 /MPICH2
 NeuroML2
+NeuroML2old
+jNeuroMLJar
+
+.DS_Store
 
 osb/cereb*
 osb/basal*
 osb/invertebrate
 osb/hippo*
 osb/showcase
+
+logs/*.log
 
 templates/SBML2NEURON
 templates/xmlTemplates/Examples
@@ -32,3 +38,8 @@ osb2
 
 lib/jython/cachedir/packages/*.pkc
 lib/jython/cachedir/packages/packages.idx
+
+docs/website/
+docs/XML/xmlForHtml/docs/python/
+docs/XML/xmlForHtml/samples/
+docs/XML/Forrest/tmp/
